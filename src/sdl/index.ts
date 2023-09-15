@@ -48,16 +48,16 @@ type NetworkVersion = 'beta2' | 'beta3';
 
 export class SDL {
 
-    data: v2Sdl;
+    data: v3Sdl;
     version: NetworkVersion;
 
-    constructor(data: v2Sdl, version: NetworkVersion = 'beta3') {
+    constructor(data: v3Sdl, version: NetworkVersion = 'beta3') {
         this.data = data;
         this.version = version;
     }
 
     static fromString(yaml: string, version: NetworkVersion = 'beta3') {
-        const data = SDL.validate(yaml, version) as v2Sdl;
+        const data = SDL.validate(yaml, version) as v3Sdl;
 
         return new SDL(data, version);
     }
@@ -73,7 +73,7 @@ export class SDL {
             }
         }
 
-        return data;
+        return data as any as v2Sdl;
     }
 
     static validateGPU(name: string, gpu: v3ResourceGPU | undefined) {
@@ -504,7 +504,7 @@ export class SDL {
             command: service.command || null,
             args: service.args || null,
             env: service.env || null,
-            resources: this.serviceResourcesBeta3(id, profile as v3ProfileCompute, service, asString),
+            resources: this.serviceResourcesBeta3(id, profile as any as v3ProfileCompute, service, asString),
             count: deployment[placement].count,
             expose: this.v3ManifestExpose(service),
             params: this.v3ManifestServiceParams(service.params),
@@ -658,7 +658,7 @@ export class SDL {
         }
 
         if (this.version === 'beta3') {
-            units.gpu = this.resourceUnitGpu(resource as v3ComputeResources, asString);
+            units.gpu = this.resourceUnitGpu(resource as any as v3ComputeResources, asString);
         }
 
         return units;

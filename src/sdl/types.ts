@@ -1,3 +1,4 @@
+import { Endpoint_Kind } from "../protobuf/akash/base/v1beta3/endpoint";
 
 export type v2Manifest = v2Group[];
 
@@ -169,7 +170,7 @@ export type v2ServiceDeployment = {
 
 export type v2Deployment = Record<string, v2ServiceDeployment>
 
-export type v2CPUAttributes = Record<string, any>
+export type v2CPUAttributes = Record<string, any>[]
 
 export type v2ResourceCPU = {
     units: number | string,
@@ -209,12 +210,12 @@ export type v2ComputeResources = {
 }
 
 export type v3ComputeResources = {
-    cpu: v2ResourceCPU,
-    memory: v2ResourceMemory,
-    storage: v2ResourceStorageArray,
-    gpu: v3ResourceGPU,
-    id: number,
-}
+    cpu: v2ResourceCPU;
+    memory: v2ResourceMemory;
+    storage: v2ResourceStorageArray;
+    gpu: v3ResourceGPU;
+    id: number;
+};
 
 export type v2ProfileCompute = {
     resources: v2ComputeResources,
@@ -260,13 +261,55 @@ export type Attribute = {
     value: string,
 }
 
+export type V3Coin = {
+    denom: string;
+    amount: string;
+}
+
+export type v3GroupResourceCPU = {
+    units: {
+        val: Uint8Array
+    },
+    attributes?: Attribute[],
+}
+export type v3GroupResourceMemory = {
+    quantity: {
+        val: Uint8Array
+    };
+    attributes?: Attribute[];
+}
+export type v3GroupResourceStorage = {
+    name: string,
+    quantity: {
+        val: Uint8Array
+    };
+    attributes: Attribute[],
+}
+
+export type v3GroupResourceStorageArray = v3GroupResourceStorage[];
+
+export type v3GroupResourceGPU = {
+    units: {
+        val: Uint8Array
+    },
+    attributes?: Attribute[],
+}
+
+export type v3GroupComputeResources = {
+    cpu: v3GroupResourceCPU;
+    memory: v3GroupResourceMemory;
+    storage: v3GroupResourceStorageArray;
+    gpu: v3GroupResourceGPU;
+    id: number;
+}
+
 export type v3DeploymentGroup = {
     name: string,
     resources: Array<{
-        resource: v3ComputeResources,
-        price: number,
+        resource: v3GroupComputeResources,
+        price: V3Coin,
         count: number,
-        endpoints: Array<{ kind: number; sequence_number: number; }>,
+        endpoints: Array<{ kind: Endpoint_Kind; sequence_number: number; }>,
     }>,
     requirements: {
         attributes: Array<Attribute>,
