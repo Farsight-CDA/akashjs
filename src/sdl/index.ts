@@ -52,12 +52,12 @@ export class SDL {
     data: v2Sdl;
     version: NetworkVersion;
 
-    constructor(data: v2Sdl, version: NetworkVersion = 'beta2') {
+    constructor(data: v2Sdl, version: NetworkVersion = 'beta3') {
         this.data = data;
         this.version = version;
     }
 
-    static fromString(yaml: string, version: NetworkVersion = 'beta2') {
+    static fromString(yaml: string, version: NetworkVersion = 'beta3') {
         const data = SDL.validate(yaml, version) as v2Sdl;
 
         return new SDL(data, version);
