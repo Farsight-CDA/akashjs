@@ -17,7 +17,6 @@ export async function getQueryClient(endpoint: string) {
 export async function getMsgClient(endpoint: string, signer: OfflineSigner) {
   const msgRegistry = new Registry(getAkashTypeRegistry());
   const options: SigningStargateClientOptions = {
-    prefix: "akash",
     registry: msgRegistry,
     gasPrice: GasPrice.fromString("0.025uakt")
   };
