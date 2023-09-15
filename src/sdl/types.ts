@@ -211,7 +211,7 @@ export type v2ComputeResources = {
 export type v3ComputeResources = {
     cpu: v2ResourceCPU,
     memory: v2ResourceMemory,
-    storage: v2ResourceStorageArray | v2ResourceStorage,
+    storage: v2ResourceStorageArray,
     gpu: v3ResourceGPU,
     id: number,
 }
