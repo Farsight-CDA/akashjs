@@ -1,11 +1,12 @@
 {
   "name": "@playwo/akashjs",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "Akash Network JS SDK",
   "repository": {
     "url": "https://github.com/ovrclk/akashjs"
   },
   "main": "build/index.js",
+  "type": "module",
   "types": "build/",
   "engines": {
     "node": ">18.0.0"

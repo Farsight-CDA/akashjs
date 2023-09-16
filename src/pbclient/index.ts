@@ -1,4 +1,4 @@
-import { messages } from "../stargate";
+import { messages } from "../stargate/index";
 
 // dynamically determine max gas
 const fee = {

@@ -1,15 +1,14 @@
-const {
-  getCrypto,
+import {
   getAlgorithmParameters,
   AttributeTypeAndValue,
   Certificate,
   BasicConstraints,
   Extension,
   ExtKeyUsage,
-} = require("pkijs/build");
+} from "pkijs/build";
 
-const { arrayBufferToString, toBase64 } = require("pvutils");
-const asn1js = require("asn1js");
+import { arrayBufferToString, toBase64 } from "pvutils";
+import asn1js from "asn1js";
 
 const HASH_ALG = "SHA-256";
 const SIGN_ALG = "ECDSA";
@@ -22,21 +21,27 @@ export interface pems {
 
 export async function create(address: string) {
   // get crypto handler
-  const crypto = getCrypto();
+  // const crypto = getCrypto()!;
 
   // get algo params
-  const algo = getAlgorithmParameters(SIGN_ALG, "generatekey");
+  const algo = getAlgorithmParameters(SIGN_ALG, "generateKey");
 
-  const keyPair = await crypto.generateKey(algo.algorithm, true, algo.usages);
+  const keyPair = await crypto.subtle.generateKey({
+    name: SIGN_ALG,
+    namedCurve: "P-256"
+  } satisfies EcKeyGenParams, true, algo.usages) 
+
   const cert = await createCSR(keyPair, HASH_ALG, {
     commonName: address,
   });
 
   setValidityPeriod(cert, new Date(), 365); // Good from today for 365 days
 
+  keyPair
+
   const certBER = cert.toSchema(true).toBER(false);
-  const spki = await crypto.exportKey("spki", keyPair.privateKey);
-  const pkcs8 = await crypto.exportKey("pkcs8", keyPair.privateKey);
+  const spki = await crypto.subtle.exportKey("spki", keyPair.privateKey);
+  const pkcs8 = await crypto.subtle.exportKey("pkcs8", keyPair.privateKey);
 
   const pems = {
     csr: `-----BEGIN CERTIFICATE-----\n${formatPEM(
@@ -77,7 +82,6 @@ async function createCSR(keyPair: any, hashAlg: any, { commonName }: any) {
     })
   );
 
-  cert.attributes = [];
   cert.extensions = [];
 
   //region "KeyUsage" extension

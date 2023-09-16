@@ -1,24 +1,14 @@
 import { create as create509, pems } from "./generate509";
 import { SigningStargateClient } from "@cosmjs/stargate";
-import { messages as stargateMessages } from "../stargate";
-import { createStarGateMessage } from "../pbclient";
-
-import {
-  QueryCertificatesRequest,
-  QueryCertificatesResponse,
-} from "../protobuf/akash/cert/v1beta1/query"
-import { CertificateFilter } from "../protobuf/akash/cert/v1beta1/cert";
-
-const JsonRPC = require("simple-jsonrpc-js");
-const { toBase64 } = require("pvutils");
-const jrpc = JsonRPC.connect_xhr(
-  "https://bridge.testnet.akash.network/akashnetwork"
-);
+import { messages as stargateMessages } from "../stargate/index";
+import { createStarGateMessage } from "../pbclient/index";
+import { toBase64 } from "pvutils";
 
 export { pems };
 
 export async function broadcastCertificate(
-  { csr, publicKey }: pems,
+  csr: string, 
+  publicKey: string,
   owner: string,
   client: SigningStargateClient
 ) {
@@ -53,27 +43,6 @@ export async function revokeCertificate(
   return await client.signAndBroadcast(owner, [message.message], message.fee);
 }
 
-export async function queryCertificates(filter: CertificateFilter) {
-  const txBodyBytes = QueryCertificatesRequest.encode(
-    QueryCertificatesRequest.fromJSON({
-      filter,
-    })
-  ).finish();
-
-  return QueryCertificatesResponse.decode(
-    base64ToUInt(
-      (
-        await jrpc.call("abci_query", {
-          height: "0",
-          path: "/akash.cert.v1beta1.Query/Certificates",
-          prove: false,
-          data: bufferToHex(txBodyBytes),
-        })
-      ).response.value
-    )
-  );
-}
-
 function base64ToUInt(base64: string) {
   var binary_string = window.atob(base64);
   var len = binary_string.length;
@@ -82,10 +51,4 @@ function base64ToUInt(base64: string) {
     bytes[i] = binary_string.charCodeAt(i);
   }
   return bytes;
-}
-
-function bufferToHex(buffer: any) {
-  return [...new Uint8Array(buffer)]
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
 }

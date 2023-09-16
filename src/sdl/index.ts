@@ -28,8 +28,8 @@ import {
     v2ServiceParams,
     v3DeploymentGroup,
     v3ManifestServiceParams
-} from './types';
-import { convertCpuResourceString, convertResourceString } from './sizes';
+} from './types.js';
+import { convertCpuResourceString, convertResourceString } from './sizes.js';
 import { default as stableStringify } from "json-stable-stringify";
 
 const Endpoint_SHARED_HTTP = 0;

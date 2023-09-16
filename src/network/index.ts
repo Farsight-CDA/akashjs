@@ -1,6 +1,6 @@
 import fetch, { RequestInfo, RequestInit } from 'node-fetch';
 import { performance } from 'perf_hooks';
-import { awaitAll, filter, map, prop, sortBy } from '../util';
+import { awaitAll, filter, map, prop, sortBy } from '../util.js';
 
 type NETWORK_TYPE =
     "mainnet" |
