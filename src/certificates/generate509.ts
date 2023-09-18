@@ -8,7 +8,7 @@ import {
 } from "pkijs/build";
 
 import { arrayBufferToString, toBase64 } from "pvutils";
-import asn1js from "asn1js";
+import { Integer, PrintableString, BitString } from "asn1js";
 
 const HASH_ALG = "SHA-256";
 const SIGN_ALG = "ECDSA";
@@ -26,10 +26,14 @@ export async function create(address: string) {
   // get algo params
   const algo = getAlgorithmParameters(SIGN_ALG, "generateKey");
 
-  const keyPair = await crypto.subtle.generateKey({
-    name: SIGN_ALG,
-    namedCurve: "P-256"
-  } satisfies EcKeyGenParams, true, algo.usages) 
+  const keyPair = await crypto.subtle.generateKey(
+    {
+      name: SIGN_ALG,
+      namedCurve: "P-256",
+    } satisfies EcKeyGenParams,
+    true,
+    algo.usages
+  );
 
   const cert = await createCSR(keyPair, HASH_ALG, {
     commonName: address,
@@ -37,7 +41,7 @@ export async function create(address: string) {
 
   setValidityPeriod(cert, new Date(), 365); // Good from today for 365 days
 
-  keyPair
+  keyPair;
 
   const certBER = cert.toSchema(true).toBER(false);
   const spki = await crypto.subtle.exportKey("spki", keyPair.privateKey);
@@ -62,12 +66,12 @@ async function createCSR(keyPair: any, hashAlg: any, { commonName }: any) {
   const cert = new Certificate();
   cert.version = 2;
 
-  cert.serialNumber = new asn1js.Integer({ value: Date.now() });
+  cert.serialNumber = new Integer({ value: Date.now() });
 
   cert.issuer.typesAndValues.push(
     new AttributeTypeAndValue({
       type: "2.5.4.3", // Common name
-      value: new asn1js.PrintableString({
+      value: new PrintableString({
         value: commonName,
       }),
     })
@@ -76,7 +80,7 @@ async function createCSR(keyPair: any, hashAlg: any, { commonName }: any) {
   cert.subject.typesAndValues.push(
     new AttributeTypeAndValue({
       type: "2.5.4.3", // Common name
-      value: new asn1js.PrintableString({
+      value: new PrintableString({
         value: commonName,
       }),
     })
@@ -91,7 +95,7 @@ async function createCSR(keyPair: any, hashAlg: any, { commonName }: any) {
   bitView[0] |= 0x10; //data encypherment
   bitView[0] |= 0x20; //key Encipherment
 
-  const keyUsage = new asn1js.BitString({ valueHex: bitArray });
+  const keyUsage = new BitString({ valueHex: bitArray });
 
   cert.extensions.push(
     new Extension({
