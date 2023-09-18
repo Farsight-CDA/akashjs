@@ -41,10 +41,8 @@ export async function create(address: string) {
 
   setValidityPeriod(cert, new Date(), 365); // Good from today for 365 days
 
-  keyPair;
-
   const certBER = cert.toSchema(true).toBER(false);
-  const spki = await crypto.subtle.exportKey("spki", keyPair.privateKey);
+  const spki = await crypto.subtle.exportKey("spki", keyPair.publicKey);
   const pkcs8 = await crypto.subtle.exportKey("pkcs8", keyPair.privateKey);
 
   const pems = {

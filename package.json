@@ -1,26 +1,10 @@
 {
-  "name": "@playwo/akashjs",
-  "version": "0.5.5",
-  "description": "Akash Network JS SDK",
-  "repository": {
-    "url": "https://github.com/ovrclk/akashjs"
-  },
-  "main": "build/index.js",
-  "types": "build/",
-  "engines": {
-    "node": ">18.0.0"
-  },
-  "scripts": {
-    "build": "rimraf build && npm run build:tsc",
-    "build:production": "set NODE_ENV=test&& npm run build:tsc",
-    "build:tsc": "rimraf build && npx tsc",
-    "dev:watch": "npx tsc -- --watch",
-    "test": "npm run test:unit",
-    "test:unit": "tap --ts tests/test_*.ts",
-    "prepublishOnly": "npm run build:production"
-  },
   "author": "",
-  "license": "Apache-2.0",
+  "browser": {
+    "fs": false,
+    "os": false,
+    "path": false
+  },
   "dependencies": {
     "@cosmjs/launchpad": "^0.27.1",
     "@cosmjs/proto-signing": "^0.31.1",
@@ -40,6 +24,7 @@
     "pvutils": "^1.1.3",
     "simple-jsonrpc-js": "^1.2.0"
   },
+  "description": "Akash Network JS SDK",
   "devDependencies": {
     "@types/atob": "^2.1.2",
     "@types/js-yaml": "^4.0.6",
@@ -55,14 +40,29 @@
     "ts-proto": "^1.157.0",
     "typescript": "^5.2.2"
   },
-  "browser": {
-    "fs": false,
-    "os": false,
-    "path": false
+  "engines": {
+    "node": ">18.0.0"
   },
   "files": [
     "umd/",
     "build/**/*.d.ts",
     "build/**/*.js"
-  ]
+  ],
+  "license": "Apache-2.0",
+  "main": "build/index.js",
+  "name": "@playwo/akashjs",
+  "repository": {
+    "url": "https://github.com/ovrclk/akashjs"
+  },
+  "scripts": {
+    "build": "rimraf build && npm run build:tsc",
+    "build:production": "set NODE_ENV=test&& npm run build:tsc",
+    "build:tsc": "rimraf build && npx tsc",
+    "dev:watch": "npx tsc -- --watch",
+    "prepublishOnly": "npm run build:production",
+    "test": "npm run test:unit",
+    "test:unit": "tap --ts tests/test_*.ts"
+  },
+  "types": "build/",
+  "version": "0.5.7"
 }
