@@ -19,11 +19,17 @@ export interface pems {
   privateKey?: string;
 }
 
-export async function create(address: string) {
-  // get crypto handler
-  // const crypto = getCrypto()!;
+export interface CertificateOptions {
+  validityDays: number;
+}
 
-  // get algo params
+const DEFAULT_CERTIFICATE_OPTIONS = {
+  validityDays: 365,
+} satisfies CertificateOptions;
+
+export async function create(address: string, options?: CertificateOptions) {
+  options = { ...DEFAULT_CERTIFICATE_OPTIONS, ...options };
+
   const algo = getAlgorithmParameters(SIGN_ALG, "generateKey");
 
   const keyPair = await crypto.subtle.generateKey(
@@ -39,7 +45,7 @@ export async function create(address: string) {
     commonName: address,
   });
 
-  setValidityPeriod(cert, new Date(), 365); // Good from today for 365 days
+  setValidityPeriod(cert, new Date(), options.validityDays); // Good from today for 365 days
 
   const certBER = cert.toSchema(true).toBER(false);
   const spki = await crypto.subtle.exportKey("spki", keyPair.publicKey);
