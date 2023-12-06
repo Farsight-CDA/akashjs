@@ -64,5 +64,5 @@
     "test:unit": "tap --ts tests/test_*.ts"
   },
   "types": "build/",
-  "version": "0.5.7"
+  "version": "0.5.9"
 }
