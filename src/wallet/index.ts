@@ -3,13 +3,13 @@ import keytar from "keytar";
 
 let wallet: any;
 
-export async function createAccount(password: string) {
+export async function createAccount() {
   wallet = await Secp256k1HdWallet.generate(undefined, { prefix: "akash" });
   const [{ address }] = await wallet.getAccounts();
   keytar.setPassword("AkashNetwork", address, wallet.mnemonic);
   return {
     mnemonic: wallet.mnemonic,
-    address,
+    address
   };
 }
 

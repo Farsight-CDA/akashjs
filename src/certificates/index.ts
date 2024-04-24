@@ -1,14 +1,19 @@
 import { create as create509, pems } from "./generate509";
 import { SigningStargateClient } from "@cosmjs/stargate";
-import { messages as stargateMessages } from "../stargate/index";
-import { createStarGateMessage } from "../pbclient/index";
+import { Message as stargateMessages } from "../stargate";
+import { createStarGateMessage } from "../pbclient/pbclient";
+
+import { QueryCertificatesRequest, QueryCertificatesResponse, CertificateFilter } from "@akashnetwork/akash-api/akash/cert/v1beta3";
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const JsonRPC = require("simple-jsonrpc-js");
+
 import { toBase64 } from "pvutils";
 
-export { pems };
+const jrpc = JsonRPC.connect_xhr("https://bridge.testnet.akash.network/akashnetwork");
 
 export async function broadcastCertificate(
-  csr: string, 
-  publicKey: string,
+  { csr, publicKey }: pems,
   owner: string,
   client: SigningStargateClient
 ) {
@@ -17,7 +22,7 @@ export async function broadcastCertificate(
   const message = createStarGateMessage(stargateMessages.MsgCreateCertificate, {
     owner: owner,
     cert: encodedCsr,
-    pubkey: encdodedPublicKey,
+    pubkey: encdodedPublicKey
   });
 
   return await client.signAndBroadcast(owner, [message.message], message.fee);
@@ -28,27 +33,52 @@ export async function createCertificate(bech32Address: string) {
   return certificate;
 }
 
-export async function revokeCertificate(
-  owner: string,
-  serial: string,
-  client: SigningStargateClient
-) {
+export async function revokeCertificate(owner: string, serial: string, client: SigningStargateClient) {
   const message = createStarGateMessage(stargateMessages.MsgRevokeCertificate, {
     id: {
-      owner: owner,
-      serial,
-    },
+      owner,
+      serial
+    }
   });
 
   return await client.signAndBroadcast(owner, [message.message], message.fee);
 }
 
+export async function queryCertificates(filter: CertificateFilter) {
+  const txBodyBytes = QueryCertificatesRequest.encode(
+    QueryCertificatesRequest.fromJSON({
+      filter
+    })
+  ).finish();
+
+  return QueryCertificatesResponse.decode(
+    base64ToUInt(
+      (
+        await jrpc.call("abci_query", {
+          height: "0",
+          path: "/akash.cert.v1beta1.Query/Certificates",
+          prove: false,
+          data: bufferToHex(txBodyBytes)
+        })
+      ).response.value
+    )
+  );
+}
+
 function base64ToUInt(base64: string) {
-  var binary_string = window.atob(base64);
-  var len = binary_string.length;
-  var bytes = new Uint8Array(len);
-  for (var i = 0; i < len; i++) {
-    bytes[i] = binary_string.charCodeAt(i);
+  if (typeof window !== "undefined") {
+    const binary_string = window.atob(base64);
+    const len = binary_string.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+      bytes[i] = binary_string.charCodeAt(i);
+    }
+    return bytes;
   }
-  return bytes;
+
+  return Buffer.from(base64, "base64");
+}
+
+function bufferToHex(buffer: Uint8Array) {
+  return [...new Uint8Array(buffer)].map(b => b.toString(16).padStart(2, "0")).join("");
 }

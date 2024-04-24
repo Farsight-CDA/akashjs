@@ -1,4 +1,4 @@
-import { messages } from "../stargate/index";
+import { Messages } from "../stargate/index";
 
 // dynamically determine max gas
 const fee = {
@@ -11,14 +11,14 @@ const fee = {
   gas: "100000",
 };
 
-export function createAminoMessage(message: messages, messageBody: any) {
+export function createAminoMessage(message: Messages, messageBody: any) {
   return {
     typeUrl: message,
     value: messageBody,
   };
 }
 
-export function createStarGateMessage(message: messages, messageBody: any) {
+export function createStarGateMessage(message: Messages, messageBody: any) {
   return {
     message: {
       typeUrl: message,
