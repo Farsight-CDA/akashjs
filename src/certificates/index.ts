@@ -5,12 +5,29 @@ import { createStarGateMessage } from "../pbclient/pbclient";
 
 import { QueryCertificatesRequest, QueryCertificatesResponse, CertificateFilter } from "@akashnetwork/akash-api/akash/cert/v1beta3";
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const JsonRPC = require("simple-jsonrpc-js");
+import { JSONRPCClient } from "json-rpc-2.0";
 
 import { toBase64 } from "pvutils";
 
-const jrpc = JsonRPC.connect_xhr("https://bridge.testnet.akash.network/akashnetwork");
+const client:JSONRPCClient = new JSONRPCClient((jsonRPCRequest) =>
+  fetch("https://bridge.testnet.akash.network/akashnetwork", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+    },
+    body: JSON.stringify(jsonRPCRequest),
+  }).then((response) => {
+    if (response.status === 200) {
+      // Use client.receive when you received a JSON-RPC response.
+      return response
+        .json()
+        .then((jsonRPCResponse) => client.receive(jsonRPCResponse));
+    } else if (jsonRPCRequest.id !== undefined) {
+      return Promise.reject(new Error(response.statusText));
+    }
+  })
+);
+
 
 export async function broadcastCertificate(
   { csr, publicKey }: pems,
@@ -54,7 +71,7 @@ export async function queryCertificates(filter: CertificateFilter) {
   return QueryCertificatesResponse.decode(
     base64ToUInt(
       (
-        await jrpc.call("abci_query", {
+        await client.request("abci_query", {
           height: "0",
           path: "/akash.cert.v1beta1.Query/Certificates",
           prove: false,
