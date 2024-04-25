@@ -61,7 +61,7 @@ export async function create(address: string, options?: CertificateOptions) {
   return pems;
 }
 
-async function createCSR(keyPair: { privateKey: string; publicKey: string }, hashAlg: string, { commonName }: { commonName: string }) {
+async function createCSR(keyPair: CryptoKeyPair, hashAlg: string, { commonName }: { commonName: string }) {
   const cert = new Certificate();
   cert.version = 2;
 
@@ -85,7 +85,7 @@ async function createCSR(keyPair: { privateKey: string; publicKey: string }, has
     })
   );
 
-  cert.attributes = [];
+  //cert.attributes = [];
   cert.extensions = [];
 
   //region "KeyUsage" extension
