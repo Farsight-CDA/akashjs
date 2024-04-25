@@ -6,11 +6,6 @@
     "path": false
   },
   "dependencies": {
-    "@akashnetwork/akash-api": "^1.0.2",
-    "@cosmjs/launchpad": "^0.27.0",
-    "@cosmjs/proto-signing": "^0.28.11",
-    "@cosmjs/stargate": "^0.28.0",
-    "@cosmjs/tendermint-rpc": "^0.28.11",
     "asn1js": "^3.0.5",
     "atob": "^2.1.2",
     "axios": "^0.24.0",
@@ -26,6 +21,13 @@
     "pvutils": "^1.0.17",
     "simple-jsonrpc-js": "^1.2.0",
     "sort-json": "^2.0.1"
+  },
+  "peerDependencies": {
+    "@cosmjs/stargate": "^0.28.0",
+    "@akashnetwork/akash-api": "^1.0.2",
+    "@cosmjs/launchpad": "^0.27.0",
+    "@cosmjs/proto-signing": "^0.28.11",
+    "@cosmjs/tendermint-rpc": "^0.28.11"
   },
   "description": "Akash Network JS SDK",
   "devDependencies": {
@@ -87,5 +89,5 @@
     "test:unit": "tap --ts tests/test_*.ts"
   },
   "types": "build/",
-  "version": "0.6.9"
+  "version": "0.7.4"
 }
