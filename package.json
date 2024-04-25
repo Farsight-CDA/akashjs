@@ -11,12 +11,13 @@
     "@cosmjs/proto-signing": "^0.28.11",
     "@cosmjs/stargate": "^0.28.0",
     "@cosmjs/tendermint-rpc": "^0.28.11",
-    "asn1js": "^2.1.1",
+    "asn1js": "^3.0.5",
     "atob": "^2.1.2",
     "axios": "^0.24.0",
     "console-browserify": "^1.2.0",
     "cosmwasm": "^1.1.1",
     "js-yaml": "^4.1.0",
+    "json-rpc-2.0": "^1.7.0",
     "json-stable-stringify": "^1.0.2",
     "keytar": "^7.7.0",
     "node-fetch": "2",
@@ -72,7 +73,7 @@
   ],
   "license": "Apache-2.0",
   "main": "build/index.js",
-  "name": "@playwo/akashjs",
+  "name": "@leonmw/akashjs",
   "repository": {
     "url": "https://github.com/ovrclk/akashjs"
   },
@@ -86,5 +87,5 @@
     "test:unit": "tap --ts tests/test_*.ts"
   },
   "types": "build/",
-  "version": "0.5.9"
+  "version": "0.6.9"
 }
