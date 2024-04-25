@@ -1,11 +1,4 @@
-import {
-  getAlgorithmParameters,
-  AttributeTypeAndValue,
-  Certificate,
-  BasicConstraints,
-  Extension,
-  ExtKeyUsage,
-} from "pkijs/build";
+import { getAlgorithmParameters, AttributeTypeAndValue, Certificate, BasicConstraints, Extension, ExtKeyUsage } from "pkijs/build";
 
 import { arrayBufferToString, toBase64 } from "pvutils";
 import { Integer, PrintableString, BitString } from "asn1js";
@@ -24,7 +17,7 @@ export interface CertificateOptions {
 }
 
 const DEFAULT_CERTIFICATE_OPTIONS = {
-  validityDays: 365,
+  validityDays: 365
 } satisfies CertificateOptions;
 
 export async function create(address: string, options?: CertificateOptions) {
@@ -35,14 +28,14 @@ export async function create(address: string, options?: CertificateOptions) {
   const keyPair = await crypto.subtle.generateKey(
     {
       name: SIGN_ALG,
-      namedCurve: "P-256",
+      namedCurve: "P-256"
     } satisfies EcKeyGenParams,
     true,
     algo.usages
   );
 
   const cert = await createCSR(keyPair, HASH_ALG, {
-    commonName: address,
+    commonName: address
   });
 
   setValidityPeriod(cert, new Date(), options.validityDays); // Good from today for 365 days
@@ -52,15 +45,9 @@ export async function create(address: string, options?: CertificateOptions) {
   const pkcs8 = await crypto.subtle.exportKey("pkcs8", keyPair.privateKey);
 
   const pems = {
-    csr: `-----BEGIN CERTIFICATE-----\n${formatPEM(
-      toBase64(arrayBufferToString(certBER))
-    )}\n-----END CERTIFICATE-----`,
-    privateKey: `-----BEGIN PRIVATE KEY-----\n${formatPEM(
-      toBase64(arrayBufferToString(pkcs8))
-    )}\n-----END PRIVATE KEY-----`,
-    publicKey: `-----BEGIN EC PUBLIC KEY-----\n${formatPEM(
-      toBase64(arrayBufferToString(spki))
-    )}\n-----END EC PUBLIC KEY-----`,
+    csr: `-----BEGIN CERTIFICATE-----\n${formatPEM(toBase64(arrayBufferToString(certBER)))}\n-----END CERTIFICATE-----`,
+    privateKey: `-----BEGIN PRIVATE KEY-----\n${formatPEM(toBase64(arrayBufferToString(pkcs8)))}\n-----END PRIVATE KEY-----`,
+    publicKey: `-----BEGIN EC PUBLIC KEY-----\n${formatPEM(toBase64(arrayBufferToString(spki)))}\n-----END EC PUBLIC KEY-----`
   };
 
   return pems;
@@ -76,8 +63,8 @@ async function createCSR(keyPair: any, hashAlg: any, { commonName }: any) {
     new AttributeTypeAndValue({
       type: "2.5.4.3", // Common name
       value: new PrintableString({
-        value: commonName,
-      }),
+        value: commonName
+      })
     })
   );
 
@@ -85,8 +72,8 @@ async function createCSR(keyPair: any, hashAlg: any, { commonName }: any) {
     new AttributeTypeAndValue({
       type: "2.5.4.3", // Common name
       value: new PrintableString({
-        value: commonName,
-      }),
+        value: commonName
+      })
     })
   );
 
@@ -106,7 +93,7 @@ async function createCSR(keyPair: any, hashAlg: any, { commonName }: any) {
       extnID: "2.5.29.15",
       critical: true,
       extnValue: keyUsage.toBER(false),
-      parsedValue: keyUsage, // Parsed value for well-known extensions
+      parsedValue: keyUsage // Parsed value for well-known extensions
     })
   );
   //endregion
@@ -114,22 +101,22 @@ async function createCSR(keyPair: any, hashAlg: any, { commonName }: any) {
   //region Extended Key Usage
   const extKeyUsage = new ExtKeyUsage({
     keyPurposes: [
-      "1.3.6.1.5.5.7.3.2", // id-kp-clientAuth
-    ],
+      "1.3.6.1.5.5.7.3.2" // id-kp-clientAuth
+    ]
   });
 
   cert.extensions.push(
     new Extension({
       extnID: "2.5.29.37",
       extnValue: extKeyUsage.toSchema().toBER(false),
-      parsedValue: extKeyUsage, // Parsed value for well-known extensions
+      parsedValue: extKeyUsage // Parsed value for well-known extensions
     })
   );
   //endregion
 
   //region "BasicConstraints" extension
   const basicConstr = new BasicConstraints({
-    cA: false,
+    cA: false
   });
 
   cert.extensions.push(
@@ -137,7 +124,7 @@ async function createCSR(keyPair: any, hashAlg: any, { commonName }: any) {
       extnID: "2.5.29.19",
       critical: true,
       extnValue: basicConstr.toSchema().toBER(false),
-      parsedValue: basicConstr, // Parsed value for well-known extensions
+      parsedValue: basicConstr // Parsed value for well-known extensions
     })
   );
   //endregion
@@ -154,11 +141,11 @@ function formatPEM(pemString: any) {
 
 function setValidityPeriod(cert: any, startDate: any, durationInDays: any) {
   // Normalize to midnight
-  var start = new Date(startDate);
+  const start = new Date(startDate);
   start.setHours(0);
   start.setMinutes(0);
   start.setSeconds(0);
-  var end = new Date(start.getTime() + durationInDays * 24 * 60 * 60 * 1000);
+  const end = new Date(start.getTime() + durationInDays * 24 * 60 * 60 * 1000);
 
   cert.notBefore.value = start;
   cert.notAfter.value = end;

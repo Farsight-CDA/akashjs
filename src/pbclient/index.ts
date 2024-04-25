@@ -5,16 +5,16 @@ const fee = {
   amount: [
     {
       denom: "uakt",
-      amount: "1000",
-    },
+      amount: "1000"
+    }
   ],
-  gas: "100000",
+  gas: "100000"
 };
 
 export function createAminoMessage(message: messages, messageBody: any) {
   return {
     typeUrl: message,
-    value: messageBody,
+    value: messageBody
   };
 }
 
@@ -22,8 +22,8 @@ export function createStarGateMessage(message: messages, messageBody: any) {
   return {
     message: {
       typeUrl: message,
-      value: messageBody,
+      value: messageBody
     },
-    fee: fee,
+    fee: fee
   };
 }

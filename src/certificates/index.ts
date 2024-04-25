@@ -6,18 +6,13 @@ import { toBase64 } from "pvutils";
 
 export { pems };
 
-export async function broadcastCertificate(
-  csr: string, 
-  publicKey: string,
-  owner: string,
-  client: SigningStargateClient
-) {
+export async function broadcastCertificate(csr: string, publicKey: string, owner: string, client: SigningStargateClient) {
   const encodedCsr = base64ToUInt(toBase64(csr));
   const encdodedPublicKey = base64ToUInt(toBase64(publicKey));
   const message = createStarGateMessage(stargateMessages.MsgCreateCertificate, {
     owner: owner,
     cert: encodedCsr,
-    pubkey: encdodedPublicKey,
+    pubkey: encdodedPublicKey
   });
 
   return await client.signAndBroadcast(owner, [message.message], message.fee);
@@ -28,26 +23,22 @@ export async function createCertificate(bech32Address: string) {
   return certificate;
 }
 
-export async function revokeCertificate(
-  owner: string,
-  serial: string,
-  client: SigningStargateClient
-) {
+export async function revokeCertificate(owner: string, serial: string, client: SigningStargateClient) {
   const message = createStarGateMessage(stargateMessages.MsgRevokeCertificate, {
     id: {
       owner: owner,
-      serial,
-    },
+      serial
+    }
   });
 
   return await client.signAndBroadcast(owner, [message.message], message.fee);
 }
 
 function base64ToUInt(base64: string) {
-  var binary_string = window.atob(base64);
-  var len = binary_string.length;
-  var bytes = new Uint8Array(len);
-  for (var i = 0; i < len; i++) {
+  const binary_string = window.atob(base64);
+  const len = binary_string.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) {
     bytes[i] = binary_string.charCodeAt(i);
   }
   return bytes;
