@@ -1,11 +1,4 @@
-import {
-  getAlgorithmParameters,
-  AttributeTypeAndValue,
-  Certificate,
-  BasicConstraints,
-  Extension,
-  ExtKeyUsage,
-} from "pkijs/build";
+import { getAlgorithmParameters, AttributeTypeAndValue, Certificate, BasicConstraints, Extension, ExtKeyUsage } from "pkijs/build";
 
 import { arrayBufferToString, toBase64 } from "pvutils";
 import { Integer, PrintableString, BitString } from "asn1js";
@@ -24,7 +17,7 @@ export interface CertificateOptions {
 }
 
 const DEFAULT_CERTIFICATE_OPTIONS = {
-  validityDays: 365,
+  validityDays: 365
 } satisfies CertificateOptions;
 
 export async function create(address: string, options?: CertificateOptions) {
@@ -36,7 +29,7 @@ export async function create(address: string, options?: CertificateOptions) {
   const keyPair = await crypto.subtle.generateKey(
     {
       name: SIGN_ALG,
-      namedCurve: "P-256",
+      namedCurve: "P-256"
     } satisfies EcKeyGenParams,
     true,
     algo.usages

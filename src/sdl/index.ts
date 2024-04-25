@@ -49,39 +49,44 @@ function isString(str: any): str is string {
 type NetworkVersion = "beta2" | "beta3";
 
 export class SDL {
-  data: v2Sdl;
+  data: v3Sdl;
   version: NetworkVersion;
 
-  constructor(data: v2Sdl, version: NetworkVersion = "beta2") {
+  constructor(data: v3Sdl, version: NetworkVersion = "beta3") {
     this.data = data;
     this.version = version;
   }
 
-  static fromString(yaml: string, version: NetworkVersion = "beta2") {
-    const data = SDL.validate(yaml) as v2Sdl;
+  static fromString(yaml: string, version: NetworkVersion = "beta3") {
+    const data = SDL.validate(yaml, version) as v3Sdl;
 
     return new SDL(data, version);
   }
 
-  static validate(yaml: string) {
+  static validate(yaml: string, version: NetworkVersion) {
     // TODO: this should really be cast to unknown, then assigned
     // to v2 or v3 SDL only after being validated
     const data = YAML.load(yaml) as v3Sdl;
 
     for (const [name, profile] of Object.entries(data.profiles.compute)) {
-      SDL.validateGPU(name, profile.resources.gpu);
-      SDL.validateStorage(name, profile.resources.storage);
+      if (version === "beta3") {
+        SDL.validateGPU(name, profile.resources.gpu);
+        SDL.validateStorage(name, profile.resources.storage);
+      }
     }
 
     return data;
   }
 
   static validateGPU(name: string, gpu: v3ResourceGPU | undefined) {
-    if (gpu) {
-      if (typeof gpu.units === "undefined") {
-        console.log(JSON.stringify(gpu, null, 2));
-        throw new Error("GPU units must be specified for profile " + name);
-      }
+    if (!gpu) {
+      throw new Error("GPU resource is required for profile " + name);
+    }
+
+    if (typeof gpu.units === "undefined") {
+      console.log(JSON.stringify(gpu, null, 2));
+      throw new Error("GPU units must be specified for profile " + name);
+    }
 
       const units = parseInt(gpu.units.toString());
 
@@ -116,7 +121,6 @@ export class SDL {
         throw new Error(`GPU interface must be one of the supported interfaces (${GPU_SUPPORTED_INTERFACES.join(",")}).`);
       }
     }
-  }
 
   static validateStorage(name: string, storage?: v2ResourceStorage | v2ResourceStorageArray) {
     if (!storage) {
@@ -180,7 +184,7 @@ export class SDL {
   deploymentsByPlacement(placement: string) {
     const deployments = this.data ? this.data.deployment : [];
 
-    return Object.entries(deployments as object).filter(({ 1: deployment }) => Object.prototype.hasOwnProperty.call(deployment, placement));
+    return Object.entries(deployments as object).filter(([name, deployment]) => deployment.hasOwnProperty(placement));
   }
 
   resourceUnit(val: string, asString: boolean) {
@@ -739,7 +743,9 @@ export class SDL {
                 key,
                 value
               }))
-            : []) as unknown as Array<{ key: string; value: string }>;
+            : []) as unknown as Array<{ key: string;
+            value: string;
+          }>;
 
           attributes.sort((a, b) => a.key.localeCompare(b.key));
 

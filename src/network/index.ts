@@ -72,7 +72,9 @@ function getEndpointHealthStatus(timeout: number) {
   return ({ address }: { address: string }) => {
     const startTime = performance.now();
 
-    return fetch(`${address}/node_info`, { timeout })
+    return fetchWithTimeout(`${address}/node_info`, {
+      timeout: timeout
+    })
       .then(() => ({
         address,
         responseTime: Math.floor(performance.now() - startTime)
