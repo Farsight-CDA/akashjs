@@ -52,7 +52,7 @@
   ],
   "license": "Apache-2.0",
   "main": "build/index.js",
-  "name": "@playwo/akashjs",
+  "name": "@leonmw/akashjs",
   "repository": {
     "url": "https://github.com/ovrclk/akashjs"
   },
@@ -69,5 +69,5 @@
     "test:unit": "tap --ts tests/test_*.ts"
   },
   "types": "build/",
-  "version": "0.5.9"
+  "version": "0.7.7"
 }
