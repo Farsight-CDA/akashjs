@@ -1,63 +1,68 @@
-import { getAlgorithmParameters, AttributeTypeAndValue, Certificate, BasicConstraints, Extension, ExtKeyUsage } from "pkijs/build";
-
 import { arrayBufferToString, toBase64 } from "pvutils";
-import { Integer, PrintableString, BitString } from "asn1js";
 
+import asn1js, { BitString, PrintableString } from "asn1js";
+if(window == undefined){
+  global.crypto = require("node:crypto");
+}
+
+
+const {
+  getCrypto,
+  getAlgorithmParameters,
+  AttributeTypeAndValue,
+  Certificate,
+  BasicConstraints,
+  Extension,
+  ExtKeyUsage
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+} = require("pkijs/build");
 const HASH_ALG = "SHA-256";
 const SIGN_ALG = "ECDSA";
 
 export interface pems {
-  csr?: string;
-  publicKey?: string;
-  privateKey?: string;
+  csr: string;
+  publicKey: string;
+  privateKey: string;
 }
 
-export interface CertificateOptions {
-  validityDays: number;
-}
+export async function create(address: string) {
+  // get crypto handler
+  const crypto = getCrypto();
 
-const DEFAULT_CERTIFICATE_OPTIONS = {
-  validityDays: 365
-} satisfies CertificateOptions;
+  // get algo params
+  const algo = getAlgorithmParameters(SIGN_ALG, "generatekey");
 
-export async function create(address: string, options?: CertificateOptions) {
-  options = { ...DEFAULT_CERTIFICATE_OPTIONS, ...options };
-
-  const algo = getAlgorithmParameters(SIGN_ALG, "generateKey");
-
-  const keyPair = await crypto.subtle.generateKey(
-    {
-      name: SIGN_ALG,
-      namedCurve: "P-256"
-    } satisfies EcKeyGenParams,
-    true,
-    algo.usages
-  );
-
+  const keyPair = await crypto.generateKey(algo.algorithm, true, algo.usages);
   const cert = await createCSR(keyPair, HASH_ALG, {
-    commonName: address
+    commonName: address,
   });
 
-  setValidityPeriod(cert, new Date(), options.validityDays); // Good from today for 365 days
+  setValidityPeriod(cert, new Date(), 365); // Good from today for 365 days
 
   const certBER = cert.toSchema(true).toBER(false);
-  const spki = await crypto.subtle.exportKey("spki", keyPair.publicKey);
-  const pkcs8 = await crypto.subtle.exportKey("pkcs8", keyPair.privateKey);
+  const spki = await crypto.exportKey("spki", keyPair.privateKey);
+  const pkcs8 = await crypto.exportKey("pkcs8", keyPair.privateKey);
 
   const pems = {
-    csr: `-----BEGIN CERTIFICATE-----\n${formatPEM(toBase64(arrayBufferToString(certBER)))}\n-----END CERTIFICATE-----`,
-    privateKey: `-----BEGIN PRIVATE KEY-----\n${formatPEM(toBase64(arrayBufferToString(pkcs8)))}\n-----END PRIVATE KEY-----`,
-    publicKey: `-----BEGIN EC PUBLIC KEY-----\n${formatPEM(toBase64(arrayBufferToString(spki)))}\n-----END EC PUBLIC KEY-----`
+    csr: `-----BEGIN CERTIFICATE-----\n${formatPEM(
+      toBase64(arrayBufferToString(certBER))
+    )}\n-----END CERTIFICATE-----`,
+    privateKey: `-----BEGIN PRIVATE KEY-----\n${formatPEM(
+      toBase64(arrayBufferToString(pkcs8))
+    )}\n-----END PRIVATE KEY-----`,
+    publicKey: `-----BEGIN EC PUBLIC KEY-----\n${formatPEM(
+      toBase64(arrayBufferToString(spki))
+    )}\n-----END EC PUBLIC KEY-----`,
   };
 
   return pems;
 }
 
-async function createCSR(keyPair: any, hashAlg: any, { commonName }: any) {
+async function createCSR(keyPair: { privateKey: string; publicKey: string }, hashAlg: string, { commonName }: { commonName: string }) {
   const cert = new Certificate();
   cert.version = 2;
 
-  cert.serialNumber = new Integer({ value: Date.now() });
+  cert.serialNumber = new asn1js.Integer({ value: Date.now() });
 
   cert.issuer.typesAndValues.push(
     new AttributeTypeAndValue({
@@ -135,11 +140,11 @@ async function createCSR(keyPair: any, hashAlg: any, { commonName }: any) {
 }
 
 // add line break every 64th character
-function formatPEM(pemString: any) {
+function formatPEM(pemString: string) {
   return pemString.replace(/(.{64})/g, "$1\n");
 }
 
-function setValidityPeriod(cert: any, startDate: any, durationInDays: any) {
+function setValidityPeriod(cert: { notBefore: { value: Date }; notAfter: { value: Date } }, startDate: Date, durationInDays: number) {
   // Normalize to midnight
   const start = new Date(startDate);
   start.setHours(0);

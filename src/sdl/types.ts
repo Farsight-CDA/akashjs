@@ -1,4 +1,3 @@
-import { Endpoint_Kind } from "../protobuf/akash/base/v1beta3/endpoint";
 
 export type v2Manifest = v2Group[];
 
@@ -36,6 +35,7 @@ export type v3ManifestService = {
   count: number;
   expose: v3ServiceExpose[];
   params: v3ManifestServiceParams | null;
+  credentials: v2ServiceImageCredentials | null;
 };
 
 export type v2ServiceExposeHttpOptions = {
@@ -56,7 +56,7 @@ export type v3ServiceExposeHttpOptions = {
   nextCases: string[];
 };
 
-export type ResourceUnits = {};
+export type ResourceUnits = Record<string, any>;
 
 export type v2ServiceExpose = {
   Port: number;
@@ -151,6 +151,13 @@ export type v2ServiceParams = {
   storage?: Record<string, v2ServiceStorageParams>;
 };
 
+export type v2ServiceImageCredentials = {
+  host: string;
+  email: string;
+  username: string;
+  password: string;
+};
+
 export type v2Service = {
   image: string;
   command: string[] | null;
@@ -159,6 +166,7 @@ export type v2Service = {
   expose: v2Expose[];
   dependencies?: v2Dependency[];
   params?: v2ServiceParams;
+  credentials?: v2ServiceImageCredentials;
 };
 
 export type v2ServiceDeployment = {
@@ -168,7 +176,7 @@ export type v2ServiceDeployment = {
 
 export type v2Deployment = Record<string, v2ServiceDeployment>;
 
-export type v2CPUAttributes = Record<string, any>[];
+export type v2CPUAttributes = Record<string, any>;
 
 export type v2ResourceCPU = {
   units: number | string;
@@ -182,7 +190,7 @@ export type v2ResourceMemory = {
 
 export type v3GPUAttributes = {
   vendor: {
-    [vendor: string]: Array<{ model: string }>;
+    [vendor: string]: Array<{ model: string; ram?: string; interface?: string }>;
   };
 };
 
@@ -304,10 +312,10 @@ export type v3GroupComputeResources = {
 export type v3DeploymentGroup = {
   name: string;
   resources: Array<{
-    resource: v3GroupComputeResources;
-    price: V3Coin;
+    resource: v3ComputeResources;
+    price: number;
     count: number;
-    endpoints: Array<{ kind: Endpoint_Kind; sequence_number: number }>;
+    endpoints: Array<{ kind: number; sequence_number: number }>;
   }>;
   requirements: {
     attributes: Array<Attribute>;
