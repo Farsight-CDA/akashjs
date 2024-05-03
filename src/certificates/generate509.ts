@@ -1,7 +1,7 @@
 import { arrayBufferToString, toBase64 } from "pvutils";
 
 import asn1js, { BitString, PrintableString } from "asn1js";
-if(window == undefined){
+if (typeof window == "undefined") {
   global.crypto = require("node:crypto");
 }
 

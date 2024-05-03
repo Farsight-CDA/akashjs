@@ -2,10 +2,8 @@ import { create as create509, pems } from "./generate509";
 import { SigningStargateClient } from "@cosmjs/stargate";
 import { Message as stargateMessages } from "../stargate";
 import { createStarGateMessage } from "../pbclient/pbclient";
-
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-expect-error
-import { QueryCertificatesRequest, QueryCertificatesResponse, CertificateFilter } from "@akashnetwork/akash-api/akash/cert/v1beta3";
+import { CertificateFilter } from "../protobuf/akash/cert/v1beta3/cert";
+import { QueryCertificatesRequest, QueryCertificatesResponse } from "../protobuf/akash/cert/v1beta3/query";
 
 import { JSONRPCClient } from "json-rpc-2.0";
 
