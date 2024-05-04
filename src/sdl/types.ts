@@ -4,6 +4,13 @@ export type v2Manifest = v2Group[];
 
 export type v3Manifest = v3Group[];
 
+
+export class VersionError extends Error {
+  constructor(msg?: string) {
+    super("Wrong Version" + msg);
+  }
+}
+
 export type v3Group = {
   name: string;
   services: v3ManifestService[];

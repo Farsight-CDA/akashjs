@@ -27,7 +27,7 @@ import {
   v3ComputeResources,
   v2ServiceParams,
   v3DeploymentGroup,
-  v3ManifestServiceParams
+  v3ManifestServiceParams, VersionError
 } from "./types.js";
 import { convertCpuResourceString, convertResourceString } from "./sizes.js";
 import { default as stableStringify } from "json-stable-stringify";
@@ -144,7 +144,7 @@ export class SDL {
   deploymentsByPlacement(placement: string) {
     const deployments = this.data ? this.data.deployment : [];
 
-    return Object.entries(deployments as object).filter(([name, deployment]) => deployment.hasOwnProperty(placement));
+    return Object.entries(deployments as object).filter(([, deployment]) => Object.prototype.hasOwnProperty.call(deployment, placement));
   }
 
   resourceUnit(val: string, asString: boolean) {
@@ -501,6 +501,9 @@ export class SDL {
   }
 
   v2Manifest(asString: boolean = false): v2Manifest {
+    if (this.version === "beta3"){
+      throw new VersionError()
+    }
     return Object.keys(this.placements()).map(name => ({
       Name: name,
       Services: this.deploymentsByPlacement(name).map(([service]) => this.v2ManifestService(name, service, asString))
@@ -508,6 +511,9 @@ export class SDL {
   }
 
   v3Manifest(asString: boolean = false): v3Manifest {
+    if (this.version === "beta2"){
+      throw new VersionError()
+    }
     const groups = this.v3Groups();
     const serviceId = (pIdx: number, sIdx: number) => groups[pIdx].resources[sIdx].resource.id;
 
@@ -519,9 +525,10 @@ export class SDL {
     }));
   }
 
-  manifest(asString: boolean = false): v2Manifest | v3Manifest {
-    return this.version === "beta2" ? this.v2Manifest(asString) : this.v3Manifest(asString);
-  }
+  // this should newer be called
+  // manifest(asString: boolean = false): v2Manifest | v3Manifest {
+  //   return this.version === "beta2" ? this.v2Manifest(asString) : this.v3Manifest(asString);
+  // }
 
   computeEndpointSequenceNumbers(sdl: v2Sdl) {
     return Object.fromEntries(
@@ -649,7 +656,10 @@ export class SDL {
   }
 
   groups() {
-    return this.version === "beta2" ? this.v2Groups() : this.v3Groups();
+    if (this.version !== "beta3") {
+      throw new Error("old version")
+    }
+    return this.v3Groups();
   }
 
   v3Groups() {
@@ -734,7 +744,6 @@ export class SDL {
   }
 
   v2Groups() {
-    const sdl = this;
     const yamlJson = this.data;
     const ipEndpointNames = this.computeEndpointSequenceNumbers(yamlJson);
 
@@ -791,7 +800,7 @@ export class SDL {
               const exposeSpec = {
                 port: expose.port,
                 externalPort: expose.as || 0,
-                proto: sdl.parseServiceProto(expose.proto),
+                proto: this.parseServiceProto(expose.proto),
                 global: !!to.global
               };
 
@@ -800,7 +809,7 @@ export class SDL {
                 endpoints.push({ kind: Endpoint_LEASED_IP, sequence_number: seqNo });
               }
 
-              const kind = sdl.exposeShouldBeIngress(exposeSpec) ? Endpoint_SHARED_HTTP : Endpoint_RANDOM_PORT;
+              const kind = this.exposeShouldBeIngress(exposeSpec) ? Endpoint_SHARED_HTTP : Endpoint_RANDOM_PORT;
 
               endpoints.push({ kind: kind, sequence_number: 0 });
             });
@@ -825,7 +834,17 @@ export class SDL {
   }
 
   manifestSortedJSON() {
-    const manifest = this.manifest(true);
+    let manifest:v3Manifest|v2Manifest|null = null
+    if (this.version === "beta2"){
+      manifest = this.v2Manifest(true)
+    }
+    else if (this.version === "beta3"){
+      manifest = this.v3Manifest(true)
+    }
+    else {
+      throw new VersionError("no version set");
+    }
+
     let jsonStr = JSON.stringify(manifest);
 
     if (jsonStr) {
