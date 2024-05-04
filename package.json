@@ -38,9 +38,7 @@
     "ts-loader": "^9.4.4",
     "ts-node": "^10.9.1",
     "ts-proto": "^1.157.0",
-    "typescript": "^5.2.2",
-    "prettier": "^3.2.5",
-    "@typescript-eslint/eslint-plugin": "^7.2.0"
+    "typescript": "^5.2.2"
   },
   "engines": {
     "node": ">18.0.0"
@@ -60,9 +58,6 @@
     "build": "rimraf build && npm run build:tsc",
     "build:production": "set NODE_ENV=test&& npm run build:tsc",
     "build:tsc": "rimraf build && npx tsc",
-    "format": "prettier --write './**/*.{js,ts,json}' --config ./.prettierrc",
-    "lint": "eslint . --ext .js,.ts,.json -c .eslintrc.json",
-    "lint:fix": "npm run lint -- --fix",
     "dev:watch": "npx tsc -- --watch",
     "prepublishOnly": "npm run build:production",
     "test": "npm run test:unit",
