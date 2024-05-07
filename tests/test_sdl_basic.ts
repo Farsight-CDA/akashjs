@@ -2,7 +2,7 @@ import tap from "tap";
 
 import { SDL } from '../src/sdl';
 
-const testSDL = `version: '2.0'
+const testSDL = `version: '3.0'
 services:
   tetris:
     image: bsord/tetris
@@ -206,7 +206,7 @@ tap.test("SDL: Manifest", async (t) => {
   t.plan(1);
 
   const sdl = SDL.fromString(testSDL);
-  const result = sdl.manifest();
+  const result = sdl.v3Manifest();
   const expected = expectedManifest;
 
   t.same(result, expected, "Manifest matches expected result");
